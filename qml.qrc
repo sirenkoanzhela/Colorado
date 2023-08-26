@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>MainPage.qml</file>
+        <file>Color.qml</file>
+        <file>ColorSpectrum.qml</file>
+        <file>Palette.qml</file>
+        <file>BaseButton.qml</file>
+        <file>CircleButton.qml</file>
+        <file>Notification.qml</file>
+    </qresource>
+</RCC>

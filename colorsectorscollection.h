@@ -3,6 +3,7 @@
 #include <QAbstractListModel>
 #include <QVector>
 #include <QColor>
+#include "datahandler.h"
 
 class ColorSectorsCollection : public QAbstractListModel
 {
@@ -67,6 +68,7 @@ private:
     QVector<QVector<QColor>> m_collection;
 
     int m_highlighted_color_index = -1;
+    DataHandler m_data_handler;
 };
 
 #endif // COLORSECTORSCOLLECTION_H

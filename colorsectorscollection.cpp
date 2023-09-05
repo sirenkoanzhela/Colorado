@@ -8,6 +8,29 @@ ColorSectorsCollection::ColorSectorsCollection(QObject *parent)
     qRegisterMetaType<ColorSectorsCollection*>("ColorSectorsCollection*");
 
 
+
+    if( m_data_handler.isDataExists())
+    {
+        m_collection = m_data_handler.loadData();
+    }
+    else
+    {
+        m_collection.reserve(MAX_THREAD_COUNT);
+        for(int i = 0; i < m_collection.capacity(); ++i)
+        {
+            QVector<QColor> colorThread;
+            colorThread.reserve(MAX_SECTOR_COUNT - i);
+            for(int j = 0; j<colorThread.capacity(); ++j)
+            {
+                QColor col;
+                col = Qt::white;
+                colorThread.append(col);
+
+            }
+            m_collection.append(colorThread);
+        }
+    }
+
     // initial create 5 threads. Todo: make colorThreads count dynamic
     // with posibility to add or remove colorThread
 
@@ -18,9 +41,9 @@ ColorSectorsCollection::ColorSectorsCollection(QObject *parent)
     // data from file or DB
 
     // todo: add data loader
+/*
 
     m_collection.reserve(MAX_THREAD_COUNT);
-
     for(int i = 0; i < m_collection.capacity(); ++i)
     {
         QVector<QColor> colorThread;
@@ -34,7 +57,7 @@ ColorSectorsCollection::ColorSectorsCollection(QObject *parent)
         }
         m_collection.append(colorThread);
     }
-
+*/
     //------------------------------------------------------
 }
 
@@ -71,9 +94,8 @@ QVariant ColorSectorsCollection::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    const QVector<QColor> &thread = m_collection.at(index.row()); //at - throw exeption
+    const QVector<QColor> &thread = m_collection.at(index.row());
 
-    // Проверка допустимости столбца (он соответствует индексу цвета в потоке)
     if (thread.isEmpty())
     {
         return QVariant();
@@ -81,14 +103,14 @@ QVariant ColorSectorsCollection::data(const QModelIndex &index, int role) const
 
     switch (role)
     {
-    case ThreadRole:
-    {
-        return QVariant::fromValue(thread);  // Возвращает целиком поток цветов
-    }
-    default:
-    {
-        return QVariant();  // Невалидное значение для неизвестной роли
-    }
+        case ThreadRole:
+        {
+            return QVariant::fromValue(thread);
+        }
+        default:
+        {
+            return QVariant();
+        }
     }
 }
 
@@ -138,6 +160,7 @@ void ColorSectorsCollection::addSector(const int &index)
         m_collection[index].append(QColor(Qt::white));
         endResetModel();
         emit sectorsCountChanged();
+        m_data_handler.saveData(m_collection);
     }
 
 }
@@ -155,6 +178,7 @@ void ColorSectorsCollection::removeSector(const int &index)
         m_collection[index].removeLast();
         endResetModel();
         emit sectorsCountChanged();
+        m_data_handler.saveData(m_collection);
     }
 }
 

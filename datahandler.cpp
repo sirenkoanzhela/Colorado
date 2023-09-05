@@ -8,11 +8,10 @@ DataHandler::DataHandler()
 
 void DataHandler::saveData(QVector<QVector<QColor>> collection)
 {
-    //QString path = QDir::currentPath() + "/path_to_your_file.dat";
     QFile file(QDir::currentPath() + "/saved.dat");
         if (file.open(QIODevice::WriteOnly)) {
             QDataStream out(&file);
-            out.setVersion(QDataStream::Qt_5_15); // или другая версия, которую вы используете
+            out.setVersion(QDataStream::Qt_5_15);
 
             for (const auto &innerVector : collection) {
                 out << innerVector.size();
@@ -30,7 +29,7 @@ QVector<QVector<QColor>> DataHandler::loadData()
     QFile file(QDir::currentPath() + "/saved.dat");
         if (file.open(QIODevice::ReadOnly)) {
             QDataStream in(&file);
-            in.setVersion(QDataStream::Qt_5_15); // установите ту же версию, что и при записи
+            in.setVersion(QDataStream::Qt_5_15);
 
             QVector<QVector<QColor>> collection;
             collection.clear();
@@ -56,7 +55,6 @@ QVector<QVector<QColor>> DataHandler::loadData()
 bool DataHandler::isDataExists()
 {
     if (!QFile::exists(QDir::currentPath() + "/saved.dat")) {
-        // Файл не существует
         return false;
     }
     return true;

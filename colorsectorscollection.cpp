@@ -33,32 +33,6 @@ ColorSectorsCollection::ColorSectorsCollection(QObject *parent)
 
     // initial create 5 threads. Todo: make colorThreads count dynamic
     // with posibility to add or remove colorThread
-
-    //------------------------------------------------------
-    // this part as added to simulate the filled 5 threads
-    // to debug collection model
-    // in future, there will be possibility to load
-    // data from file or DB
-
-    // todo: add data loader
-/*
-
-    m_collection.reserve(MAX_THREAD_COUNT);
-    for(int i = 0; i < m_collection.capacity(); ++i)
-    {
-        QVector<QColor> colorThread;
-        colorThread.reserve(MAX_SECTOR_COUNT - i);
-        for(int j = 0; j<colorThread.capacity(); ++j)
-        {
-            QColor col;
-            col = Qt::white;
-            colorThread.append(col);
-
-        }
-        m_collection.append(colorThread);
-    }
-*/
-    //------------------------------------------------------
 }
 
 int ColorSectorsCollection::rowCount(const QModelIndex &parent) const
@@ -129,7 +103,7 @@ void ColorSectorsCollection::addThread()
     {
         beginInsertRows(QModelIndex(), m_collection.count(), m_collection.count());
         QVector<QColor> colorThread;
-        m_collection.append(colorThread); //emplace why better?
+        m_collection.append(colorThread);
         endInsertRows();
     }
 }

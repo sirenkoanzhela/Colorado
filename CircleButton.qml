@@ -22,6 +22,7 @@ Rectangle {
         id: label
         anchors.centerIn: parent
         text:  "CB" //default
+        font.pointSize: 20
         color: enabled ? "white" : "gray"
     }
 

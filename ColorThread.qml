@@ -36,7 +36,6 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        colorSelected(rowIndex, indexOfThisDelegate);
                         if(currentIndex === index)
                         {
                             currentIndex = -1;
@@ -45,6 +44,7 @@ Rectangle {
                         {
                             currentIndex = index;
                         }
+                        colorSelected(rowIndex, indexOfThisDelegate);
                     }
                 }
             }
@@ -62,9 +62,10 @@ Rectangle {
                     iconSourceEnabled: "icons/trash_icon.png"
                     iconSourceDisabled: "icons/trash_icon_disabled.png"
 
+                    enabled: colorSectorsCollection.isRemoveSectorEnable(rowIndex, currentIndex)
+
                     onBaseButtonClicked: {
-                        colorSectorsCollection.removeSector(colorSectorsCollection.currentIndex);
-                        console.log("Remove highlighted sector. Now color sectors count is", colorSectorsCollection.rowCount());
+                        colorSectorsCollection.removeSector(rowIndex, currentIndex);
 
                     }
                 }
@@ -94,7 +95,10 @@ Rectangle {
         function onSectorsCountChanged() {
             removeSectorButton.enabled = colorSectorsCollection.isRemoveSectorEnable(rowIndex);
             addSectorButton.enabled = colorSectorsCollection.isAddSectorEnable(rowIndex);
-            removeHighlightedButton.enabled = colorSectorsCollection.rowCount() > 1 && colorSectorsCollection.currentIndex !== -1;
+            removeHighlightedButton.enabled = colorSectorsCollection.isRemoveSectorEnable(rowIndex, currentIndex);
         }
+    }
+    onColorSelected: {
+        removeHighlightedButton.enabled = colorSectorsCollection.isRemoveSectorEnable(rowIndex, currentIndex);
     }
 }

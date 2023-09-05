@@ -6,61 +6,85 @@ import QtQml.Models 2.15
 
 Rectangle {
     id: thread
-    width: 200*5
+    width: Screen.width / 2
     height: 50
     border.color: "grey"
     color: "transparent"
 
     property int currentIndex: -1
-    property int rowIndex: 0
+    property int rowIndex: -1
+    signal colorSelected(int threadIndex, int colorIndex)
 
     Row {
         id: mainThread
+        anchors.fill: parent
         Repeater {
-            model: colorSectorsCollection.columnCount(colorSectorsCollection.createIndex(rowIndex, 0))
-
+            model: colorSectorsCollection.data( colorSectorsCollection.createIndex(rowIndex, 0), 257 )
             delegate: Rectangle {
-                width: thread.width / colorSectorsCollection.columnCount(colorSectorsCollection.createIndex(rowIndex, 0))
+
+                property int indexOfThisDelegate: index
+
+                width: thread.width / colorSectorsCollection.getThreadSize(rowIndex)
                 height: parent.height
 
                 Color {
                     id: color
                     anchors.fill: parent
-                    color: colorSectorsCollection.data(colorSectorsCollection.createIndex(rowIndex, index), colorSectorsCollection.colorRole)
-                    border.color: currentIndex === index ? "red" : "black"
+                    color: colorSectorsCollection.getColorForIndices(rowIndex, parent.indexOfThisDelegate)
+                    border.color: currentIndex === indexOfThisDelegate ? "red" : "black"
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        colorSelected(rowIndex, indexOfThisDelegate);
+                        if(currentIndex === index)
+                        {
+                            currentIndex = -1;
+                        }
+                        else
+                        {
+                            currentIndex = index;
+                        }
+                    }
                 }
             }
         }
 
-        BaseButton {
-            id: removeHighlightedButton
-            iconSourceEnabled: "icons/trash_icon.png"
-            iconSourceDisabled: "icons/trash_icon_disabled.png"
-            //enabled: colorSectorsCollection.rowCount() > 1 && colorSectorsCollection.currentIndex !== -1;
-            //enabled: colorSectorsCollection.getThreadCount(colorSectorsCollection.currentIndex) > 1 && colorSectorsCollection.currentIndex !== -1;
-            //enabled: colorSectorsCollection.canRemoveSector(colorSectorsCollection.currentIndex) && colorSectorsCollection.currentIndex !== -1;
-            enabled: colorSectorsCollection.canRemoveSector(colorSectorsCollection.currentIndex) && colorSectorsCollection.currentIndex !== -1;
+        Item {
+            id: controlButtons
+            width: removeHighlightedButton.width + removeSectorButton.width + addSectorButton.width
+            height: parent.height
+            Row {
+                anchors.fill: parent
+                spacing: 5
+                BaseButton {
+                    id: removeHighlightedButton
+                    iconSourceEnabled: "icons/trash_icon.png"
+                    iconSourceDisabled: "icons/trash_icon_disabled.png"
 
-            onBaseButtonClicked: {
-                colorSectorsCollection.removeSector(colorSectorsCollection.currentIndex);
-                console.log("Remove highlighted sector. Now color sectors count is", colorSectorsCollection.rowCount());
+                    onBaseButtonClicked: {
+                        colorSectorsCollection.removeSector(colorSectorsCollection.currentIndex);
+                        console.log("Remove highlighted sector. Now color sectors count is", colorSectorsCollection.rowCount());
 
-            }
-        }
-        CircleButton {
-            id: removeSectorButton
-            buttonText: "-"
-            enabled: colorSectorsCollection.rowCount() > 1;
-            onCircleButtonClicked: {
-                colorSectorsCollection.removeSector(colorSectorsCollection.createIndex(rowIndex,0));
-            }
-        }
-        CircleButton {
-            id: addSectorButton
-            buttonText: "+"
+                    }
+                }
+                CircleButton {
+                    id: removeSectorButton
+                    buttonText: "-"
+                    enabled: colorSectorsCollection.isRemoveSectorEnable(rowIndex)
+                    onCircleButtonClicked: {
+                        colorSectorsCollection.removeSector(rowIndex);
+                    }
+                }
+                CircleButton {
+                    id: addSectorButton
+                    buttonText: "+"
+                    enabled: colorSectorsCollection.isAddSectorEnable(rowIndex)
 
-            onCircleButtonClicked: {
-                colorSectorsCollection.addSector(colorSectorsCollection.createIndex(rowIndex,0));
+                    onCircleButtonClicked: {
+                        colorSectorsCollection.addSector(rowIndex);
+                    }
+                }
             }
         }
     }
@@ -68,46 +92,9 @@ Rectangle {
     Connections {
         target: colorSectorsCollection
         function onSectorsCountChanged() {
-            removeSectorButton.enabled = colorSectorsCollection.rowCount() > 1;
-            addSectorButton.enabled = colorSectorsCollection.rowCount() < 5;
+            removeSectorButton.enabled = colorSectorsCollection.isRemoveSectorEnable(rowIndex);
+            addSectorButton.enabled = colorSectorsCollection.isAddSectorEnable(rowIndex);
             removeHighlightedButton.enabled = colorSectorsCollection.rowCount() > 1 && colorSectorsCollection.currentIndex !== -1;
         }
     }
 }
-
-
-/*
-old implementation
-
-
-    ListView {
-        orientation: ListView.Horizontal
-        anchors.fill: parent
-        interactive: false
-        spacing: 2
-
-        model: threadColor
-
-        delegate: Rectangle {
-            anchors.fill: parent
-            Color {
-                id: color
-                width: thread.width / threadColor.rowCount() - 2
-
-                height: parent.height
-
-                colorName: model.color
-                colorHex: model.color
-
-                border.color: currentIndex === index ? "red" : "black"
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        currentIndex = index;
-                    }
-                }
-            }
-        }
-    }
-*/

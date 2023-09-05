@@ -1,16 +1,15 @@
 #include "colorsectorscollection.h"
 #include <iostream>
+#include <QDebug>
 
 ColorSectorsCollection::ColorSectorsCollection(QObject *parent)
-    : QAbstractItemModel(parent)
+    : QAbstractListModel(parent)
 {
     qRegisterMetaType<ColorSectorsCollection*>("ColorSectorsCollection*");
 
 
     // initial create 5 threads. Todo: make colorThreads count dynamic
     // with posibility to add or remove colorThread
-
-    std::cout << "ThreadColorCollection constructor" << std::endl;
 
     //------------------------------------------------------
     // this part as added to simulate the filled 5 threads
@@ -36,14 +35,6 @@ ColorSectorsCollection::ColorSectorsCollection(QObject *parent)
         m_collection.append(colorThread);
     }
 
-    for(int i = 0; i< m_collection.size(); ++i)
-    {
-        std::cout << i << " thread. Its size = " << m_collection.at(i).size() << std::endl;
-        for( int j = 0; j < m_collection.at(i).size(); ++j)
-        {
-            std::cout << "[i][j] = " <<m_collection.at(i).front().name().toStdString() << " ";
-        }
-    }
     //------------------------------------------------------
 }
 
@@ -53,45 +44,15 @@ int ColorSectorsCollection::rowCount(const QModelIndex &parent) const
     return m_collection.count();
 }
 
-int ColorSectorsCollection::columnCount(const QModelIndex &parent) const
-{
-    //return m_collection[parent.row()].count(); //add check
-
-    return m_collection.at(parent.row()).count();
-
-
-    // from Qt Documentation:
-    // When implementing a table based model, columnCount() should return 0 when the parent is valid.
-    if (!parent.isValid())
-    {
-        int maxColumns = 0;
-        for (const auto& subvector : m_collection)
-        {
-            if (subvector.count() > maxColumns)
-                maxColumns = subvector.count();
-        }
-        return maxColumns;
-    }
-    return 0;
-}
-
 QModelIndex ColorSectorsCollection::index(int row, int column, const QModelIndex &parent) const
 {
-    if (!hasIndex(row, column, parent))
+    if (!hasIndex(row, column, parent)) {
         return QModelIndex();
-
-    if (!parent.isValid()) {  // Если родителя нет, то это тред.
-        return createIndex(row, column);
     }
+    return createIndex(row, column);
 
     assert(false);
-    return QModelIndex();  // Этот код не должен быть достигнут, но для безопасности мы возвращаем невалидный индекс.
-}
-
-QModelIndex ColorSectorsCollection::parent(const QModelIndex &) const
-{
-    //Q_UNUSED(index);
-    return QModelIndex();  // Всегда возвращаем невалидный индекс, так как у нас нет иерархии.
+    return QModelIndex();
 }
 
 int ColorSectorsCollection::getThreadCount(const QModelIndex &parent) const
@@ -105,27 +66,29 @@ int ColorSectorsCollection::getThreadCount(const QModelIndex &parent) const
 
 QVariant ColorSectorsCollection::data(const QModelIndex &index, int role) const
 {
-    // Проверка допустимости индекса
     if (!index.isValid() || index.row() < 0 || index.row() >= m_collection.size())
+    {
         return QVariant();
+    }
 
-    // Получение соответствующего потока
     const QVector<QColor> &thread = m_collection.at(index.row()); //at - throw exeption
 
     // Проверка допустимости столбца (он соответствует индексу цвета в потоке)
-    if (index.column() < 0 || index.column() >= thread.size())
+    if (thread.isEmpty())
+    {
         return QVariant();
+    }
 
-    // В зависимости от роли возвращаем значение
-    switch (role) {
-        case ThreadRole:
-            return QVariant::fromValue(thread);  // Возвращает целиком поток цветов
-
-        case ColorRole:
-            return QVariant::fromValue(thread.at(index.column()));  // Возвращает конкретный цвет из потока
-
-        default:
-            return QVariant();  // Невалидное значение для неизвестной роли
+    switch (role)
+    {
+    case ThreadRole:
+    {
+        return QVariant::fromValue(thread);  // Возвращает целиком поток цветов
+    }
+    default:
+    {
+        return QVariant();  // Невалидное значение для неизвестной роли
+    }
     }
 }
 
@@ -162,65 +125,63 @@ void ColorSectorsCollection::removeThread(const QModelIndex &index)
 }
 
 
-void ColorSectorsCollection::addSector(const QModelIndex &index)
+void ColorSectorsCollection::addSector(const int &index)
 {
-    if( !index.isValid() )
+    if( index < 0 || index >= m_collection.size() || m_collection.at(index).isEmpty())
     {
         return;
     }
 
-    if( m_collection[index.row()].count() < MAX_SECTOR_COUNT ){
-        beginInsertColumns(QModelIndex(), rowCount(), rowCount());
-        m_collection[index.row()].append(QColor(Qt::white));
-        endInsertColumns();
+    if(m_collection.at(index).size() < MAX_SECTOR_COUNT)
+    {
+        beginResetModel();
+        m_collection[index].append(QColor(Qt::white));
+        endResetModel();
+        emit sectorsCountChanged();
+    }
+
+}
+
+void ColorSectorsCollection::removeSector(const int &index)
+{
+    if( index < 0 || index >= m_collection.size() || m_collection.at(index).isEmpty())
+    {
+        return;
+    }
+
+    if(m_collection.at(index).size() > 1)
+    {
+        beginResetModel();
+        m_collection[index].removeLast();
+        endResetModel();
         emit sectorsCountChanged();
     }
 }
 
-void ColorSectorsCollection::removeSector(const QModelIndex &index)
+void ColorSectorsCollection::removeSector(const int &index,  const int &highlightedSectorIndex)
 {
-    if(!index.isValid())
+    if( index < 0 || index >= m_collection.size() || m_collection.at(index).isEmpty())
     {
         return;
     }
-    if(m_collection.isEmpty() || m_collection[index.row()].isEmpty() )
-    {
-        return;
-    }
-    int lastSectorIndex = m_collection[index.row()].count() - 1;
-
-    beginRemoveColumns(QModelIndex(), lastSectorIndex, lastSectorIndex);
-    m_collection[index.row()].removeLast();
-    endRemoveColumns();
-
-    emit sectorsCountChanged();
-
-    std::cout << "Removed sector" << std::endl;
-    std::cout << "Now sectors count is : " <<m_collection[index.row()].size() << std::endl;
-}
-
-void ColorSectorsCollection::removeSector(const QModelIndex &index,  const QModelIndex &highlightedSectorIndex)
-{
-    if (!index.isValid() || !highlightedSectorIndex.isValid())
+    if( highlightedSectorIndex >= m_collection.at(index).size() || highlightedSectorIndex <0)
     {
         return;
     }
 
-    if(m_collection.isEmpty() || m_collection[index.row()].isEmpty() )
+    if(m_collection.isEmpty() || m_collection[index].isEmpty() )
     {
         return;
     }
 
-    int row = index.row();
+    if(m_collection.at(index).size() > 1)
+    {
+        beginResetModel();
+        m_collection[index].remove(highlightedSectorIndex);
+        endResetModel();
+        emit sectorsCountChanged();
 
-    beginRemoveColumns(QModelIndex(), row, row);
-    m_collection[index.row()].removeAt(row);
-    endRemoveColumns();
-
-    emit sectorsCountChanged();
-
-    std::cout << "Removed sector with index: " << index.row() << std::endl;
-    std::cout << "Now sectors count is : " <<m_collection[index.row()].size() << std::endl;
+    }
 }
 
 void ColorSectorsCollection::changeSectorColor(const QModelIndex &threadIndex,const QModelIndex &colorIndex, QColor color)
@@ -231,11 +192,38 @@ void ColorSectorsCollection::changeSectorColor(const QModelIndex &threadIndex,co
     emit dataChanged(index(threadIndex.row(), colorIndex.column()), index(threadIndex.row(), colorIndex.column()), {ColorRole});
 }
 
-bool ColorSectorsCollection::canRemoveSector(const QModelIndex &index) const
+bool ColorSectorsCollection::isRemoveSectorEnable(const int &index) const
 {
-    if (!index.isValid())
+    if(index < 0 || index >= m_collection.size())
+    {
         return false;
-    if (m_collection.isEmpty() || m_collection.at(index.row()).isEmpty())
+    }
+    if(m_collection.at(index).size() > 1)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool ColorSectorsCollection::isAddSectorEnable(const int &index) const
+{
+    if(index < 0 || index >= m_collection.size())
+    {
         return false;
-    return m_collection.at(index.row()).count() > 1;
+    }
+    if(m_collection.at(index).size() < MAX_SECTOR_COUNT)
+    {
+        return true;
+    }
+    return false;
+
+}
+
+int ColorSectorsCollection::getThreadSize(const int &index) const
+{
+    if( index < 0 || index >= m_collection.size() || m_collection.at(index).isEmpty())
+    {
+        return 0;
+    }
+    return m_collection.at(index).size();
 }

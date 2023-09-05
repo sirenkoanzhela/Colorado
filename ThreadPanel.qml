@@ -8,36 +8,23 @@ import QtQml.Models 2.15
 Item {
     id: panel
 
-    signal colorSelected(int threadIndex, int colorIndex)
     property int currentColor: -1
 
     Item {
         id: threadList
         anchors.fill: parent
         anchors.leftMargin: 50
-        GridView {
-            width: 1600
-            height: colorSectorsCollection.rowCount() * 50 + 20 * 4
+        ListView {
+            anchors.fill: parent
             interactive: false
-
-            cellWidth: width
-            cellHeight: 50
+            spacing: 20
 
             model: colorSectorsCollection
 
             delegate: ColorThread {
-                id: thread
                 rowIndex: index
             }
 
         }
-
     }
-
 }
-//{
-
-  //ListView {
-  //   model: threadModel
-  //   delegat: ColorThread {}
- // }

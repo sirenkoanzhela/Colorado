@@ -1,4 +1,5 @@
-import QtQuick 2.0
+import QtQuick 2.15
+import QtQuick.Controls 2.15
 
 Rectangle {
     property string topColorName: ""
@@ -10,6 +11,7 @@ Rectangle {
     id: _colorSpcectrum
     width: 100
     height: 100
+
     Color {
         id: _top
         width: parent.width

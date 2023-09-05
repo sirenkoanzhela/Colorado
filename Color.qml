@@ -1,17 +1,20 @@
-import QtQuick 2.0
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
+import QtQuick.Window 2.15
+import QtQml.Models 2.15
 
 
 Rectangle {
     property string colorName: ""
     property string colorHex: ""
 
-    width: 100
-    height: width/2
-
     color: colorHex
-    Text {
+
+    Label {
         id: _colorName
         text: colorName
+        anchors.centerIn: parent
     }
 
 }

@@ -1,28 +1,40 @@
-import QtQuick 2.0
+import QtQuick 2.15
 import QtQuick.Controls 2.15
 
-Item {
-    id: _parent
-    property alias labelText: _label.text
-    property alias buttonText: _button.text
+Rectangle {
+    property alias notificationText: notificationLabel.text
+    property alias buttonText: roundButton.buttonText
 
-    Column{
-        anchors.centerIn: _parent
-        spacing: 10
 
-        Text {
-            id: _label
+    implicitWidth: 300
+    implicitHeight: width / 2
+    color: "transparent"
+    border.color: "white"
 
-            color: "white"
+    Column {
+        anchors {
+            top: parent.top
+            left: parent.left
+            right: parent.right
+        }
+        topPadding: 18
+        spacing: 15
+        Label {
+            id: notificationLabel
+            text: "Notification Text Here"
+
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.topMargin: 20
+
+            wrapMode: Text.WordWrap
 
             font.pixelSize: 16
-            font.bold: false
-            font.family: "Arial"
+            color: "white"
         }
 
         CircleButton {
-            id: _button
+            id: roundButton
+            anchors.horizontalCenter: notificationLabel.horizontalCenter
         }
-
     }
 }

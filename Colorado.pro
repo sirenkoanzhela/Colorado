@@ -11,13 +11,21 @@ CONFIG += c++11
 
 SOURCES += \
     colorcontainer.cpp \
+    colorsectorscollection.cpp \
+    datahandler.cpp \
     main.cpp \
     mainwindow.cpp \
+    threadcolorcollection.cpp \
+    threadcolormodel.cpp \
     userpage.cpp
 
 HEADERS += \
     colorcontainer.h \
+    colorsectorscollection.h \
+    datahandler.h \
     mainwindow.h \
+    threadcolorcollection.h \
+    threadcolormodel.h \
     userpage.h
 
 FORMS += \
@@ -32,4 +40,5 @@ DISTFILES += \
     MainPage.qml
 
 RESOURCES += \
-    qml.qrc
+    qml.qrc \
+    resources.qrc

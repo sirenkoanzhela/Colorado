@@ -48,6 +48,7 @@ public:
     Q_INVOKABLE void removeSector(const int &threadIndex, const int &highlightedSectorIndex);
     Q_INVOKABLE void changeSectorColor(const QModelIndex &threadIndex,const QModelIndex &colorIndex, QColor color);
     Q_INVOKABLE bool isRemoveSectorEnable(const int &index) const;
+    Q_INVOKABLE bool isRemoveSectorEnable(const int &index, const int &highlightedIndex) const;
     Q_INVOKABLE bool isAddSectorEnable(const int &index) const;
     Q_INVOKABLE int getThreadSize(const int &index) const;
 

@@ -162,12 +162,12 @@ void ColorSectorsCollection::removeSector(const int &index,  const int &highligh
     {
         return;
     }
-    if( highlightedSectorIndex >= m_collection.at(index).size() || highlightedSectorIndex <0)
+    if( highlightedSectorIndex >= m_collection.at(index).size() || highlightedSectorIndex < 0)
     {
         return;
     }
 
-    if(m_collection.isEmpty() || m_collection[index].isEmpty() )
+    if(m_collection.isEmpty() || m_collection.at(index).isEmpty() )
     {
         return;
     }
@@ -178,7 +178,6 @@ void ColorSectorsCollection::removeSector(const int &index,  const int &highligh
         m_collection[index].remove(highlightedSectorIndex);
         endResetModel();
         emit sectorsCountChanged();
-
     }
 }
 
@@ -192,6 +191,23 @@ void ColorSectorsCollection::changeSectorColor(const QModelIndex &threadIndex,co
 
 bool ColorSectorsCollection::isRemoveSectorEnable(const int &index) const
 {
+    if(index < 0 || index >= m_collection.size())
+    {
+        return false;
+    }
+    if(m_collection.at(index).size() > 1)
+    {
+        return true;
+    }
+    return false;
+}
+
+bool ColorSectorsCollection::isRemoveSectorEnable(const int &index, const int &highlightedIndex) const
+{
+    if( highlightedIndex < 0)
+    {
+        return false;
+    }
     if(index < 0 || index >= m_collection.size())
     {
         return false;

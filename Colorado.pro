@@ -10,25 +10,17 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    colorcontainer.cpp \
     colorsectorscollection.cpp \
     datahandler.cpp \
     main.cpp \
     mainwindow.cpp \
-    palettemodel.cpp \
-    threadcolorcollection.cpp \
-    threadcolormodel.cpp \
-    userpage.cpp
+    palettemodel.cpp
 
 HEADERS += \
-    colorcontainer.h \
     colorsectorscollection.h \
     datahandler.h \
     mainwindow.h \
-    palettemodel.h \
-    threadcolorcollection.h \
-    threadcolormodel.h \
-    userpage.h
+    palettemodel.h
 
 FORMS += \
     mainwindow.ui

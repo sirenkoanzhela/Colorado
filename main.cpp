@@ -1,8 +1,7 @@
 #include "mainwindow.h"
 #include "userpage.h"
 #include "colorcontainer.h"
-//#include "threadcolormodel.h"
-//#include "threadcolorcollection.h"
+#include "palettemodel.h"
 #include "colorsectorscollection.h"
 
 #include <QApplication>
@@ -16,6 +15,7 @@ int main(int argc, char *argv[])
 
     UserPage userpage;
     ColorContainer colorContainer;
+    PaletteModel paletteModel;
     //ThreadColorModel threadColorModel;
     //ThreadColorCollection threadColorCollection;
 
@@ -30,9 +30,8 @@ int main(int argc, char *argv[])
         }, Qt::QueuedConnection);
     engine.rootContext()->setContextProperty("userpage", &userpage);
     engine.rootContext()->setContextProperty("container", &colorContainer);
-    //engine.rootContext()->setContextProperty("threadColor", &threadColorModel);
-    //engine.rootContext()->setContextProperty("threadsCollectrion" ,&threadColorCollection);
     engine.rootContext()->setContextProperty("colorSectorsCollection" ,&colorSectorsCollection);
+    engine.rootContext()->setContextProperty("paletteModel" ,&paletteModel);
     engine.load(url);
     return app.exec();
 }

@@ -1,12 +1,14 @@
 #include "datahandler.h"
 #include <QDir>
+#include <QDebug>
 
-DataHandler::DataHandler()
+DataHandler::DataHandler(QObject *parent)
+    : QObject(parent)
 {
 
 }
 
-void DataHandler::saveData(QVector<QVector<QColor>> collection)
+void DataHandler::saveData(const QVector<QVector<QColor>> &collection)
 {
     QFile file(QDir::currentPath() + "/saved.dat");
         if (file.open(QIODevice::WriteOnly)) {
@@ -22,12 +24,23 @@ void DataHandler::saveData(QVector<QVector<QColor>> collection)
 
             file.close();
         }
+        else
+        {
+            qDebug() << "Cannot open file, data won't be saved";
+        }
+        //else
+        //clang
+        //make files
+        // header with path
 }
 
 QVector<QVector<QColor>> DataHandler::loadData()
 {
-    QFile file(QDir::currentPath() + "/saved.dat");
-        if (file.open(QIODevice::ReadOnly)) {
+
+        QFile file(QDir::currentPath() + "/saved.dat");
+        if(isDataExists() && file.open(QIODevice::ReadOnly))
+        {
+            //add check size
             QDataStream in(&file);
             in.setVersion(QDataStream::Qt_5_15);
 
@@ -49,6 +62,7 @@ QVector<QVector<QColor>> DataHandler::loadData()
             file.close();
             return collection;
         }
+
         return QVector<QVector<QColor>>();
 }
 

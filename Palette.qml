@@ -6,7 +6,9 @@ import QtQml.Models 2.15
 
 Item {
     id: _parent
-    //property bool isPaletteVisible: container.count > 0
+
+    property alias paletteSize: _palette.model
+    property int columns
 
     width: Screen.width / 2
     height: Screen.height / 2
@@ -14,35 +16,60 @@ Item {
     GridView {
         id: _palette
 
-        anchors.fill: parent
-        cellWidth: 100
-        cellHeight: 100
-        model: container
+        cellWidth: 300
+        cellHeight: 80
 
-        visible: false
+        width: cellWidth * _parent.columns
+        height: _parent.height
+        anchors.leftMargin: 50
+        anchors.topMargin: 20
+        anchors.left: _parent.left
+        anchors.top: _parent.top
 
-        delegate: ColorSpectrum {
+        interactive: false
+        Layout.column: _parent.columns
+
+        //model: paletteModel
+
+        delegate: Rectangle {
+            id: sector
+            property int indexOfThisDelegate: index
+
             width: _palette.cellWidth
             height: _palette.cellHeight
-            topColorName: ""
-            topColorHex: ""
-            bottomColorName: ""
-            bottomColorHex: ""
 
-            radius: 10
+            Color {
+                id: color
+                anchors.fill: parent
+                color: "#ffffff"
+                border.color: "#000000"
+            }
+
+            Text {
+                id: colorText
+                anchors.fill: sector
+                text: index +1
+            }
 
             MouseArea {
                 anchors.fill: parent
                 onClicked: {
-                    _сolorSegment.state = _сolorSegment.state === "pressed" ? "" : "pressed"
+                    console.log("Click color", colorText.text )
                 }
             }
         }
     }
+    Rectangle {
+        id: test
+        color: "#ff0000"
+        opacity: 0.5
+        anchors.fill: _palette
+        visible: false
+    }
 
     Notification {
         id: _paletteEmpty
-        visible: true
+        visible: !_palette.visible
         anchors.centerIn: _parent
 
         buttonText: "+"

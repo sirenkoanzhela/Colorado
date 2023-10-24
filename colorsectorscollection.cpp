@@ -1,38 +1,43 @@
 #include "colorsectorscollection.h"
 #include <iostream>
 #include <QDebug>
+#include <QString>
 
 ColorSectorsCollection::ColorSectorsCollection(QObject *parent)
-    : QAbstractListModel(parent)
+    : QAbstractListModel(parent),
+    m_data_handler(parent)
 {
     qRegisterMetaType<ColorSectorsCollection*>("ColorSectorsCollection*");
 
+    connect(this, &ColorSectorsCollection::sectorsCountChanged, &m_data_handler, &DataHandler::saveData);
+    connect(this, &ColorSectorsCollection::sectorColorChanged, &m_data_handler, &DataHandler::saveData);
 
+    initializeCollection();
 
-    if( m_data_handler.isDataExists())
-    {
-        m_collection = m_data_handler.loadData();
-    }
-    else
+    // initial create 5 threads. Todo: make colorThreads count dynamic
+    // with posibility to add or remove colorThread
+}
+
+void ColorSectorsCollection::initializeCollection()
+{
+    m_collection = m_data_handler.loadData();
+// add check
+    if(m_collection.isEmpty())
     {
         m_collection.reserve(MAX_THREAD_COUNT);
         for(int i = 0; i < m_collection.capacity(); ++i)
         {
             QVector<QColor> colorThread;
-            colorThread.reserve(MAX_SECTOR_COUNT - i);
+            colorThread.reserve(MAX_SECTORS_IN_THREAD_COUNT - i);
             for(int j = 0; j<colorThread.capacity(); ++j)
             {
                 QColor col;
                 col = Qt::white;
                 colorThread.append(col);
-
             }
             m_collection.append(colorThread);
         }
     }
-
-    // initial create 5 threads. Todo: make colorThreads count dynamic
-    // with posibility to add or remove colorThread
 }
 
 int ColorSectorsCollection::rowCount(const QModelIndex &parent) const
@@ -77,14 +82,14 @@ QVariant ColorSectorsCollection::data(const QModelIndex &index, int role) const
 
     switch (role)
     {
-        case ThreadRole:
-        {
-            return QVariant::fromValue(thread);
-        }
-        default:
-        {
-            return QVariant();
-        }
+    case ThreadRole:
+    {
+        return QVariant::fromValue(thread);
+    }
+    default:
+    {
+        return QVariant();
+    }
     }
 }
 
@@ -123,70 +128,60 @@ void ColorSectorsCollection::removeThread(const QModelIndex &index)
 
 void ColorSectorsCollection::addSector(const int &index)
 {
-    if( index < 0 || index >= m_collection.size() || m_collection.at(index).isEmpty())
+    if( index < 0 || index >= m_collection.size() || m_collection.at(index).isEmpty() )
     {
         return;
     }
 
-    if(m_collection.at(index).size() < MAX_SECTOR_COUNT)
+    if( m_collection.at(index).size() < MAX_SECTORS_IN_THREAD_COUNT )
     {
         beginResetModel();
         m_collection[index].append(QColor(Qt::white));
         endResetModel();
-        emit sectorsCountChanged();
-        m_data_handler.saveData(m_collection);
+        emit sectorsCountChanged(m_collection);
     }
 
 }
 
 void ColorSectorsCollection::removeSector(const int &index)
 {
-    if( index < 0 || index >= m_collection.size() || m_collection.at(index).isEmpty())
+    if( index < 0 || index >= m_collection.size() || m_collection.at(index).isEmpty() )
     {
         return;
     }
 
-    if(m_collection.at(index).size() > 1)
+    if( m_collection.at(index).size() > 1)
     {
         beginResetModel();
         m_collection[index].removeLast();
         endResetModel();
-        emit sectorsCountChanged();
-        m_data_handler.saveData(m_collection);
+        emit sectorsCountChanged(m_collection);
     }
 }
 
 void ColorSectorsCollection::removeSector(const int &index,  const int &highlightedSectorIndex)
 {
-    if( index < 0 || index >= m_collection.size() || m_collection.at(index).isEmpty())
+    if( index < 0 || index >= m_collection.size() || m_collection.at(index).isEmpty() )
     {
         return;
     }
-    if( highlightedSectorIndex >= m_collection.at(index).size() || highlightedSectorIndex < 0)
-    {
-        return;
-    }
-
-    if(m_collection.isEmpty() || m_collection.at(index).isEmpty() )
+    if( highlightedSectorIndex >= m_collection.at(index).size() || highlightedSectorIndex < 0 )
     {
         return;
     }
 
-    if(m_collection.at(index).size() > 1)
+    if( m_collection.isEmpty() || m_collection.at(index).isEmpty() )
+    {
+        return;
+    }
+
+    if (m_collection.at(index).size() > 1 )
     {
         beginResetModel();
         m_collection[index].remove(highlightedSectorIndex);
         endResetModel();
-        emit sectorsCountChanged();
+        emit sectorsCountChanged(m_collection);
     }
-}
-
-void ColorSectorsCollection::changeSectorColor(const QModelIndex &threadIndex,const QModelIndex &colorIndex, QColor color)
-{
-    if (!threadIndex.isValid() || !colorIndex.isValid())
-        return;
-    m_collection[threadIndex.row()][colorIndex.row()] = color;
-    emit dataChanged(index(threadIndex.row(), colorIndex.column()), index(threadIndex.row(), colorIndex.column()), {ColorRole});
 }
 
 bool ColorSectorsCollection::isRemoveSectorEnable(const int &index) const
@@ -225,7 +220,7 @@ bool ColorSectorsCollection::isAddSectorEnable(const int &index) const
     {
         return false;
     }
-    if(m_collection.at(index).size() < MAX_SECTOR_COUNT)
+    if(m_collection.at(index).size() < MAX_SECTORS_IN_THREAD_COUNT)
     {
         return true;
     }
@@ -240,4 +235,56 @@ int ColorSectorsCollection::getThreadSize(const int &index) const
         return 0;
     }
     return m_collection.at(index).size();
+}
+
+QModelIndex ColorSectorsCollection::createIndex(int row, int column) const {
+    return QAbstractListModel::createIndex(row, column);
+}
+
+bool ColorSectorsCollection::colorValidation(const QString &color)
+{
+    QString formattedName = color;
+    formatColor(formattedName);
+
+    QColor validatingColor(formattedName);
+    return validatingColor.isValid();
+}
+
+void ColorSectorsCollection::formatColor(QString &color)
+{
+    if (!color.startsWith('#'))
+    {
+        color.prepend('#');
+    }
+}
+
+bool ColorSectorsCollection::tryChangeSectorColor(const int &threadIndex,const int &colorIndex, QString color)
+{
+    //add check is indexes are in vectors
+    if(!colorValidation(color))
+    {
+        return false;
+    }
+    QString hex = "";
+    if (!color.startsWith('#')) {
+        hex = "#";
+    }
+    QColor tempColor(hex+color);
+
+    beginResetModel();
+    m_collection[threadIndex][colorIndex] = tempColor;
+    endResetModel();
+    emit sectorColorChanged(m_collection);
+
+    return true;
+}
+
+QColor ColorSectorsCollection::getColorForIndices(int outerIndex, int innerIndex) const {
+    if (outerIndex < 0  || outerIndex >= m_collection.size() || innerIndex < 0 || innerIndex >= m_collection.at(outerIndex).size())
+    {
+        return QColor();
+    }
+
+    const QVector<QColor> &thread = m_collection.at(outerIndex);
+    return thread.at(innerIndex);
 }

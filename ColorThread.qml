@@ -21,7 +21,7 @@ Rectangle {
         Repeater {
             model: colorSectorsCollection.data( colorSectorsCollection.createIndex(rowIndex, 0), 257 )
             delegate: Rectangle {
-
+                id: sector
                 property int indexOfThisDelegate: index
 
                 width: thread.width / colorSectorsCollection.getThreadSize(rowIndex)
@@ -33,6 +33,12 @@ Rectangle {
                     color: colorSectorsCollection.getColorForIndices(rowIndex, parent.indexOfThisDelegate)
                     border.color: currentIndex === indexOfThisDelegate ? "red" : "black"
                 }
+
+                Text {
+                    anchors.fill: sector
+                    text: colorSectorsCollection.getColorForIndices(rowIndex, parent.indexOfThisDelegate)
+                }
+
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
@@ -45,6 +51,37 @@ Rectangle {
                             currentIndex = index;
                         }
                         colorSelected(rowIndex, indexOfThisDelegate);
+                    }
+                }
+
+                TextField {
+                    id: changeColorTextField
+
+                    width: parent.width / 2
+                    height: parent.height / 2
+                    anchors.centerIn: parent
+
+                    visible: currentIndex === indexOfThisDelegate
+
+                    color: "black"
+                    placeholderText: "Enter hex of color"
+
+
+                    background: Rectangle {
+                        color: "transparent"
+                        border.color: "black"
+                        border.width: 1
+                    }
+                    onAccepted: {
+                        if(colorSectorsCollection.tryChangeSectorColor(rowIndex, parent.indexOfThisDelegate, text))
+                        {
+                            placeholderText = "Enter hex of color"
+                        }
+                        else
+                        {
+                            placeholderText = "Try again. Hex is invalid"
+                        }
+                        text = ""
                     }
                 }
             }
@@ -66,7 +103,6 @@ Rectangle {
 
                     onBaseButtonClicked: {
                         colorSectorsCollection.removeSector(rowIndex, currentIndex);
-
                     }
                 }
                 CircleButton {
@@ -98,6 +134,7 @@ Rectangle {
             removeHighlightedButton.enabled = colorSectorsCollection.isRemoveSectorEnable(rowIndex, currentIndex);
         }
     }
+
     onColorSelected: {
         removeHighlightedButton.enabled = colorSectorsCollection.isRemoveSectorEnable(rowIndex, currentIndex);
     }

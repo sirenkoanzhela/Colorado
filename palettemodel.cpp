@@ -9,8 +9,7 @@ PaletteModel::PaletteModel(QObject *parent)
 int PaletteModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
-    // Здесь верните количество элементов в вашей модели
-    return 0; // Пример
+    return 0;
 }
 
 QVariant PaletteModel::data(const QModelIndex &index, int role) const
@@ -18,7 +17,6 @@ QVariant PaletteModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    // В зависимости от роли верните соответствующие данные для элемента с индексом index.row()
     if (role == Qt::DisplayRole) {
         return "Пример данных"; // Пример
     }
@@ -30,6 +28,5 @@ QHash<int, QByteArray> PaletteModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
     roles[Qt::DisplayRole] = "display";
-    // Добавьте другие роли, если они есть
     return roles;
 }

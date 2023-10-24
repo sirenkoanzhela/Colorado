@@ -260,7 +260,7 @@ void ColorSectorsCollection::formatColor(QString &color)
 
 bool ColorSectorsCollection::tryChangeSectorColor(const int &threadIndex,const int &colorIndex, QString color)
 {
-    //add check is indexes are in vectors
+    //add check are indexes in vectors
     if(!colorValidation(color))
     {
         return false;

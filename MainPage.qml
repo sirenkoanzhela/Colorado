@@ -21,13 +21,18 @@ ApplicationWindow {
         Row {
             id: _paletteHolder
 
-            spacing: 15
+            width: Screen.width
+            height: Screen.height / 2
 
             Palette {
                 id: _mainPalette
+                paletteSize: 24
+                columns: 4
             }
             Palette {
                 id: _additionalPalette
+                paletteSize: 8
+                columns: 2
             }
         }
 

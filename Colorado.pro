@@ -15,6 +15,7 @@ SOURCES += \
     datahandler.cpp \
     main.cpp \
     mainwindow.cpp \
+    palettemodel.cpp \
     threadcolorcollection.cpp \
     threadcolormodel.cpp \
     userpage.cpp
@@ -24,6 +25,7 @@ HEADERS += \
     colorsectorscollection.h \
     datahandler.h \
     mainwindow.h \
+    palettemodel.h \
     threadcolorcollection.h \
     threadcolormodel.h \
     userpage.h

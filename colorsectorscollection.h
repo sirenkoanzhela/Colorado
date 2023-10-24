@@ -10,22 +10,12 @@ class ColorSectorsCollection : public QAbstractListModel
     Q_OBJECT
 public:
     const int MAX_THREAD_COUNT = 5;
-    const int MAX_SECTOR_COUNT = 6;
+    const int MAX_SECTORS_IN_THREAD_COUNT = 6;
     enum Role {
         ThreadRole = Qt::UserRole + 1,
         ColorRole = Qt::UserRole + 10,
     };
     Q_ENUM(Role)
-
-    enum InitialColor {
-        red = Qt::UserRole +1,
-        black,
-        yellow,
-        white,
-        grey,
-    };
-    Q_ENUM(InitialColor)
-
 
     explicit ColorSectorsCollection(QObject *parent = nullptr);
 
@@ -40,35 +30,31 @@ public:
     void removeThread(const QModelIndex &index);
 
 signals:
-    void sectorsCountChanged();
+    void sectorsCountChanged(QVector<QVector<QColor>> m_collection);
+    void sectorColorChanged(QVector<QVector<QColor>> m_collection);
 
 public:
+    //count functionality
     Q_INVOKABLE void addSector(const int &index);
     Q_INVOKABLE void removeSector(const int &index);
     Q_INVOKABLE void removeSector(const int &threadIndex, const int &highlightedSectorIndex);
-    Q_INVOKABLE void changeSectorColor(const QModelIndex &threadIndex,const QModelIndex &colorIndex, QColor color);
     Q_INVOKABLE bool isRemoveSectorEnable(const int &index) const;
     Q_INVOKABLE bool isRemoveSectorEnable(const int &index, const int &highlightedIndex) const;
     Q_INVOKABLE bool isAddSectorEnable(const int &index) const;
     Q_INVOKABLE int getThreadSize(const int &index) const;
+    Q_INVOKABLE QModelIndex createIndex(int row, int column) const;
 
-    Q_INVOKABLE QModelIndex createIndex(int row, int column) const {
-        return QAbstractListModel::createIndex(row, column);
-    }
-    Q_INVOKABLE QColor getColorForIndices(int outerIndex, int innerIndex) const {
-        if (outerIndex < 0  || outerIndex >= m_collection.size() || innerIndex < 0 || innerIndex >= m_collection.at(outerIndex).size())
-        {
-            return QColor();
-        }
+    //color functionality
+    Q_INVOKABLE bool tryChangeSectorColor(const int &threadIndex,const int &colorIndex, QString color);
+    Q_INVOKABLE QColor getColorForIndices(int outerIndex, int innerIndex) const;
 
-        const QVector<QColor> &thread = m_collection.at(outerIndex);
-        return thread.at(innerIndex);
-    }
+private:
+    void initializeCollection();
+    bool colorValidation(const QString &color);
+    void formatColor(QString& color);
 
 private:
     QVector<QVector<QColor>> m_collection;
-
-    int m_highlighted_color_index = -1;
     DataHandler m_data_handler;
 };
 
